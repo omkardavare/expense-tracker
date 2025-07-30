@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expense Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        input, select, button {
+            padding: 8px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        h2, h3 {
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h2>Personal Expense Tracker</h2>
+
+    <form method="POST">
+        <input type="date" name="date" required>
+        <input type="text" name="category" placeholder="Category" required>
+        <input type="text" name="subcategory" placeholder="Subcategory">
+        <input type="number" name="amount" placeholder="Amount" required>
+        <input type="text" name="payment_mode" placeholder="Payment Mode">
+        <input type="text" name="notes" placeholder="Notes">
+        <button type="submit">Add Expense</button>
+    </form>
+
+    <h3>All Expenses</h3>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Subcategory</th>
+            <th>Amount</th>
+            <th>Payment Mode</th>
+            <th>Notes</th>
+        </tr>
+        {% for e in expenses %}
+        <tr>
+            <td>{{ e.date }}</td>
+            <td>{{ e.category }}</td>
+            <td>{{ e.subcategory }}</td>
+            <td>{{ e.amount }}</td>
+            <td>{{ e.payment_mode }}</td>
+            <td>{{ e.notes }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: expense-tracker
+    env: python
+    buildCommand: ""
+    startCommand: "python app.py"
+    envVars:
+      - key: SUPABASE_URL
+        value: https://supabase.com/dashboard/project/nxeilfsjuqkxutiatvbc
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54ZWlsZnNqdXFreHV0aWF0dmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4OTUzMDAsImV4cCI6MjA2OTQ3MTMwMH0.JfLr6r2XHUQwN4nOguXLto3PiIcNgGjPyafiLOpf-eo
