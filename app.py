@@ -42,3 +42,7 @@ def add_expense():
 
     requests.post(f"{SUPABASE_URL}/rest/v1/expenses", json=data, headers=headers)
     return redirect('/')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
