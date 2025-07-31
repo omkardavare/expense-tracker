@@ -1,62 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Expense Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Personal Expense Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        input, select, button {
-            padding: 8px;
-            margin: 5px;
-            font-size: 14px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-        h2, h3 {
-            font-family: sans-serif;
-        }
+        body { padding: 30px; }
+        .form-control, .form-select { margin-bottom: 10px; }
+        table { margin-top: 30px; }
+        input[readonly] { background-color: #e9ecef; }
     </style>
 </head>
 <body>
-    <h2>Personal Expense Tracker</h2>
 
-    <form method="POST">
-        <input type="date" name="date" required>
-        <input type="text" name="category" placeholder="Category" required>
-        <input type="text" name="subcategory" placeholder="Subcategory">
-        <input type="number" name="amount" placeholder="Amount" required>
-        <input type="text" name="payment_mode" placeholder="Payment Mode">
-        <input type="text" name="notes" placeholder="Notes">
-        <button type="submit">Add Expense</button>
+<div class="container">
+    <h2 class="mb-4">Personal Expense Tracker</h2>
+    <form method="POST" action="/add">
+        <div class="row g-2">
+            <div class="col-md-2">
+                <input type="date" name="date" class="form-control" required>
+            </div>
+
+            <div class="col-md-2">
+                <select id="category_name" name="category_name" class="form-select" onchange="autoFillCategory()" required>
+                    <option value="">Select Category</option>
+                    <option value="Salary">Salary</option>
+                    <option value="Other Income Source">Other Income Source</option>
+                    <option value="Rent">Rent</option>
+                    <option value="Utilities">Utilities</option>
+                    <option value="Groceries">Groceries</option>
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="EMI">EMI</option>
+                    <option value="Emergency Fund">Emergency Fund</option>
+                    <option value="Bike/Car Servicing">Bike/Car Servicing</option>
+                    <option value="Insurance">Insurance</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Gifts">Gifts</option>
+                    <option value="Subscriptions">Subscriptions</option>
+                    <option value="Stationary">Stationary</option>
+                    <option value="Grooming">Grooming</option>
+                    <option value="Lent to a friend">Lent to a friend</option>
+                    <option value="Vacation">Vacation</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                    <option value="SIP/Mutual Funds">SIP/Mutual Funds</option>
+                    <option value="Gold">Gold</option>
+                    <option value="Stocks/Trading">Stocks/Trading</option>
+                    <option value="Learning">Learning</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <input type="text" id="subcategory" name="subcategory" class="form-control" placeholder="Category ID" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <input type="text" id="type" name="type" class="form-control" placeholder="Type" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <input type="number" name="amount" class="form-control" placeholder="Amount" required>
+            </div>
+
+            <div class="col-md-2">
+                <select name="payment_mode" class="form-select" required>
+                    <option value="">Payment Mode</option>
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="app_used" class="form-select" required>
+                    <option value="">App Used</option>
+                    <option value="PhonePe">PhonePe</option>
+                    <option value="Paytm">Paytm</option>
+                    <option value="Gpay">Gpay</option>
+                    <option value="BHIM">BHIM</option>
+                    <option value="Cred">Cred</option>
+                    <option value="Cash">Cash</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <input type="text" name="notes" class="form-control" placeholder="Notes (optional)">
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Add Expense</button>
+            </div>
+        </div>
     </form>
 
-    <h3>All Expenses</h3>
-    <table>
-        <tr>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Subcategory</th>
-            <th>Amount</th>
-            <th>Payment Mode</th>
-            <th>Notes</th>
-        </tr>
-        {% for e in expenses %}
-        <tr>
-            <td>{{ e.date }}</td>
-            <td>{{ e.category }}</td>
-            <td>{{ e.subcategory }}</td>
-            <td>{{ e.amount }}</td>
-            <td>{{ e.payment_mode }}</td>
-            <td>{{ e.notes }}</td>
-        </tr>
-        {% endfor %}
+    <h4 class="mt-5">All Expenses</h4>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Subcategory</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Payment Mode</th>
+                <th>App Used</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in data %}
+            <tr>
+                <td>{{ entry.date }}</td>
+                <td>{{ entry.category_name }}</td>
+                <td>{{ entry.subcategory }}</td>
+                <td>{{ entry.amount }}</td>
+                <td>{{ entry.type }}</td>
+                <td>{{ entry.payment_mode }}</td>
+                <td>{{ entry.app_used }}</td>
+                <td>{{ entry.notes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
+</div>
+
+<script>
+  function autoFillCategory() {
+    const mapping = {
+      "Salary": { id: 101, type: "Income" },
+      "Other Income Source": { id: 102, type: "Income" },
+      "Rent": { id: 201, type: "Expense" },
+      "Utilities": { id: 202, type: "Expense" },
+      "Groceries": { id: 203, type: "Expense" },
+      "Food": { id: 204, type: "Expense" },
+      "Transport": { id: 205, type: "Expense" },
+      "EMI": { id: 206, type: "Expense" },
+      "Emergency Fund": { id: 207, type: "Expense" },
+      "Bike/Car Servicing": { id: 211, type: "Expense" },
+      "Insurance": { id: 212, type: "Expense" },
+      "Entertainment": { id: 213, type: "Expense" },
+      "Shopping": { id: 214, type: "Expense" },
+      "Gifts": { id: 215, type: "Expense" },
+      "Subscriptions": { id: 216, type: "Expense" },
+      "Stationary": { id: 217, type: "Expense" },
+      "Grooming": { id: 218, type: "Expense" },
+      "Lent to a friend": { id: 219, type: "Expense" },
+      "Vacation": { id: 220, type: "Expense" },
+      "Miscellaneous": { id: 221, type: "Expense" },
+      "SIP/Mutual Funds": { id: 301, type: "Investment" },
+      "Gold": { id: 302, type: "Investment" },
+      "Stocks/Trading": { id: 303, type: "Investment" },
+      "Learning": { id: 304, type: "Investment" }
+    };
+
+    const selectedCategory = document.getElementById("category_name").value;
+    document.getElementById("subcategory").value = mapping[selectedCategory]?.id || "";
+    document.getElementById("type").value = mapping[selectedCategory]?.type || "";
+  }
+</script>
+
 </body>
 </html>

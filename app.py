@@ -1,53 +1,44 @@
 from flask import Flask, request, render_template, redirect
 import requests
 import os
-from dotenv import load_dotenv
-
-# Load variables from .env
-load_dotenv()
 
 app = Flask(__name__)
 
-SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 
-@app.route('/', methods=['GET', 'POST'])
+# Headers for Supabase API
+headers = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json"
+}
+
+@app.route('/')
 def index():
-    headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Content-Type": "application/json"
+    # Fetch all expenses
+    r_exp = requests.get(f"{SUPABASE_URL}/rest/v1/expenses?select=*", headers=headers)
+    expenses = r_exp.json()
+
+    # Fetch all categories
+    r_cat = requests.get(f"{SUPABASE_URL}/rest/v1/categories?select=*", headers=headers)
+    categories = r_cat.json()
+
+    return render_template('index.html', expenses=expenses, categories=categories)
+
+
+@app.route('/add_expense', methods=['POST'])
+def add_expense():
+    data = {
+        "date": request.form['date'],
+        "category_name": request.form['category_name'],
+        "category_id": int(request.form['category_id']),
+        "type": request.form['type'],
+        "description": request.form['description'],
+        "amount": float(request.form['amount']),
+        "mode_of_payment": request.form['mode_of_payment'],
+        "app_used": request.form['app_used'],
     }
 
-    if request.method == 'POST':
-        data = {
-            "date": request.form['date'],
-            "category": request.form['category'],
-            "subcategory": request.form['subcategory'],
-            "amount": float(request.form['amount']),
-            "payment_mode": request.form['payment_mode'],
-            "notes": request.form['notes'],
-        }
-
-        try:
-            res = requests.post(f"{SUPABASE_URL}/rest/v1/expenses", json=data, headers=headers)
-            res.raise_for_status()
-        except Exception as e:
-            print("Error adding expense:", e)
-
-        return redirect('/')
-
-    # Get all expenses
-    try:
-        r = requests.get(f"{SUPABASE_URL}/rest/v1/expenses?select=*", headers=headers)
-        r.raise_for_status()
-        expenses = r.json()
-    except Exception as e:
-        print("Error fetching expenses:", e)
-        expenses = []
-
-    return render_template('index.html', expenses=expenses)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
-
+    requests.post(f"{SUPABASE_URL}/rest/v1/expenses", json=data, headers=headers)
+    return redirect('/')
