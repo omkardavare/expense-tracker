@@ -1,48 +1,44 @@
-from flask import Flask, request, render_template, redirect
-import requests
+from flask import Flask, render_template, request, redirect
+import csv
 import os
 
 app = Flask(__name__)
-
-SUPABASE_URL = os.environ.get('SUPABASE_URL')
-SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
-
-# Headers for Supabase API
-headers = {
-    "apikey": SUPABASE_KEY,
-    "Authorization": f"Bearer {SUPABASE_KEY}",
-    "Content-Type": "application/json"
-}
+CSV_FILE = 'expenses.csv'
 
 @app.route('/')
 def index():
-    # Fetch all expenses
-    r_exp = requests.get(f"{SUPABASE_URL}/rest/v1/expenses?select=*", headers=headers)
-    expenses = r_exp.json()
-
-    # Fetch all categories
-    r_cat = requests.get(f"{SUPABASE_URL}/rest/v1/categories?select=*", headers=headers)
-    categories = r_cat.json()
-
-    return render_template('index.html', expenses=expenses, categories=categories)
-
+    data = []
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, newline='') as f:
+            reader = csv.DictReader(f)
+            data = list(reader)
+    return render_template('index.html', data=data)
 
 @app.route('/add_expense', methods=['POST'])
 def add_expense():
-    data = {
-        "date": request.form['date'],
-        "category_name": request.form['category_name'],
-        "category_id": int(request.form['category_id']),
-        "type": request.form['type'],
-        "description": request.form['description'],
-        "amount": float(request.form['amount']),
-        "mode_of_payment": request.form['mode_of_payment'],
-        "app_used": request.form['app_used'],
-    }
+    try:
+        new_entry = {
+            'date': request.form.get('date'),
+            'category_name': request.form.get('category_name'),
+            'subcategory': request.form.get('subcategory'),
+            'amount': request.form.get('amount'),
+            'type': request.form.get('type'),
+            'payment_mode': request.form.get('payment_mode'),
+            'app_used': request.form.get('app_used'),
+            'notes': request.form.get('notes')
+        }
 
-    requests.post(f"{SUPABASE_URL}/rest/v1/expenses", json=data, headers=headers)
-    return redirect('/')
+        # Ensure no required fields are missing
+        if not all([new_entry['date'], new_entry['category_name'], new_entry['subcategory'], new_entry['amount'], new_entry['type'], new_entry['payment_mode'], new_entry['app_used']]):
+            return "Bad Request: Missing required fields", 400
 
+        file_exists = os.path.isfile(CSV_FILE)
+        with open(CSV_FILE, mode='a', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=new_entry.keys())
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(new_entry)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+        return redirect('/')
+    except Exception as e:
+        return f"Error: {e}", 500
